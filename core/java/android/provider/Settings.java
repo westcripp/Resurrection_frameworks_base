@@ -5563,7 +5563,7 @@ public final class Settings {
 
         /**
          * Whether to sound when charger power is connected/disconnected
-        * @hide
+         * @hide
          */
         public static final String POWER_NOTIFICATIONS_ENABLED = "power_notifications_enabled";
 
@@ -6649,6 +6649,7 @@ public final class Settings {
             AUTO_TIME_ZONE,
             POWER_SOUNDS_ENABLED,
              POWER_NOTIFICATIONS_ENABLED,
+            POWER_NOTIFICATIONS_ENABLED,
             POWER_NOTIFICATIONS_VIBRATE,
             POWER_NOTIFICATIONS_RINGTONE,
             DOCK_SOUNDS_ENABLED,
