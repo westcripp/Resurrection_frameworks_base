@@ -26,9 +26,11 @@ LOCAL_PATH := $(call my-dir)
 # TODO: find a more appropriate way to do this.
 framework_res_source_path := APPS/framework-res_intermediates/src
 
-# the library
-# ============================================================
 include $(CLEAR_VARS)
+
+ifdef WIFI_AP_DRIVER_MODULE_PATH	
+LOCAL_CFLAGS += -DWIFI_AP_HAS_OWN_DRIVER	
+endif
 
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 LOCAL_SRC_FILES := $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS))
@@ -70,6 +72,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
+	core/java/android/app/IProfileManager.aidl \
 	core/java/android/app/IProcessObserver.aidl \
 	core/java/android/app/ISearchManager.aidl \
 	core/java/android/app/ISearchManagerCallback.aidl \
@@ -223,7 +226,21 @@ LOCAL_SRC_FILES += \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	voip/java/android/net/sip/ISipSession.aidl \
 	voip/java/android/net/sip/ISipSessionListener.aidl \
-	voip/java/android/net/sip/ISipService.aidl
+	voip/java/android/net/sip/ISipService.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IFmReceiver.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IFmTransmitter.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStateChangedListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStartedListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnErrorListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnScanListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnForcedPauseListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnForcedResetListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnBlockScanListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnRDSDataFoundListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnSignalStrengthListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStereoListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnExtraCommandListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnAutomaticSwitchListener.aidl
 #
 
 
@@ -270,6 +287,8 @@ aidl_files := \
 	frameworks/base/core/java/android/accounts/IAccountAuthenticator.aidl \
 	frameworks/base/core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
+	frameworks/base/core/java/android/app/NotificationGroup.aidl \
+	frameworks/base/core/java/android/app/Profile.aidl \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
 	frameworks/base/core/java/android/bluetooth/BluetoothDevice.aidl \
 	frameworks/base/core/java/android/bluetooth/BluetoothHealthAppConfiguration.aidl \
@@ -555,7 +574,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
 LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES) framework
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
@@ -789,7 +808,6 @@ LOCAL_MODULE := ext
 LOCAL_DX_FLAGS := --core-library
 
 include $(BUILD_JAVA_LIBRARY)
-
 
 # Include subdirectory makefiles
 # ============================================================

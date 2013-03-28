@@ -60,8 +60,6 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.WindowManagerPolicy;
 
-import com.android.internal.app.ThemeUtils;
-
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -173,7 +171,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int MAX_CPU_BOOST_TIME = 5000000;
 
     private Context mContext;
-    private Context mUiContext;
     private LightsService mLightsService;
     private BatteryService mBatteryService;
     private DisplayManagerService mDisplayManagerService;
@@ -188,6 +185,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private DreamManagerService mDreamManager;
     private LightsService.Light mAttentionLight;
     private LightsService.Light mButtonsLight;
+    private LightsService.Light mKeyboardLight;
 
     private final Object mLock = new Object();
 
@@ -295,10 +293,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Default value for dreams activate-on-dock
     private boolean mDreamsActivatedOnDockByDefaultConfig;
 
-    // True if we should fade the screen while turning it off, false if we should play
-    // a stylish electron beam animation instead.
-    private boolean mElectronBeamFadesConfig;
-
     // True if dreams are enabled by the user.
     private boolean mDreamsEnabledSetting;
 
@@ -310,12 +304,6 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     // The screen off timeout setting value in milliseconds.
     private int mScreenOffTimeoutSetting;
-
-    // Slim settings - override config for ElectronBeam
-    // used here to send values to DispLayPowerController handler
-    // from SettingsObserver
-    private boolean mElectronBeamOffEnabled;
-    private int mElectronBeamMode;
 
     // The maximum allowable screen off timeout according to the device
     // administration policy.  Overrides other settings.
@@ -353,6 +341,11 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Use -1 to disable.
     private int mScreenBrightnessOverrideFromWindowManager = -1;
 
+    // The button brightness setting override from the window manager
+    // to allow the current foreground activity to override the button brightness.
+    // Use -1 to disable.
+    private int mButtonBrightnessOverrideFromWindowManager = -1;
+
     // The user activity timeout override from the window manager
     // to allow the current foreground activity to override the user activity timeout.
     // Use -1 to disable.
@@ -382,6 +375,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeCpuBoost(int duration);
+    private boolean mKeyboardVisible = false;
 
     public PowerManagerService() {
         synchronized (mLock) {
@@ -460,6 +454,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             mSettingsObserver = new SettingsObserver(mHandler);
             mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
             mButtonsLight = mLightsService.getLight(LightsService.LIGHT_ID_BUTTONS);
+            mKeyboardLight = mLightsService.getLight(LightsService.LIGHT_ID_KEYBOARD);
 
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
@@ -506,12 +501,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SYSTEM_POWER_ENABLE_CRT_OFF),
-                    false, mSettingsObserver, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SYSTEM_POWER_CRT_MODE),
-                    false, mSettingsObserver, UserHandle.USER_ALL);
+
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -533,8 +523,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefaultConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
-        mElectronBeamFadesConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_animateScreenLights);
     }
 
     private void updateSettingsLocked() {
@@ -557,15 +545,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
-
-        // respect default config values
-        mElectronBeamOffEnabled = Settings.System.getIntForUser(resolver,
-                Settings.System.SYSTEM_POWER_ENABLE_CRT_OFF,
-                mElectronBeamFadesConfig ? 0 : 1,
-                UserHandle.USER_CURRENT) == 1;
-        mElectronBeamMode = Settings.System.getIntForUser(resolver,
-                Settings.System.SYSTEM_POWER_CRT_MODE,
-                0, UserHandle.USER_CURRENT);
 
         final int oldScreenBrightnessSetting = mScreenBrightnessSetting;
         mScreenBrightnessSetting = Settings.System.getIntForUser(resolver,
@@ -912,6 +891,18 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
         }
         return false;
+    }
+
+    @Override // Binder call
+    public void setKeyboardVisibility(boolean visible) {
+        synchronized (mLock) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "setKeyboardVisibility: " + visible);
+            }
+            if (mKeyboardVisible != visible) {
+                mKeyboardVisible = visible;
+            }
+        }
     }
 
     @Override // Binder call
@@ -1343,9 +1334,16 @@ public final class PowerManagerService extends IPowerManager.Stub
                     if (now < nextTimeout) {
                         if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
                             mButtonsLight.setBrightness(0);
+                            mKeyboardLight.setBrightness(0);
                         } else {
-                            mButtonsLight.setBrightness(mDisplayPowerRequest.screenBrightness);
-                            nextTimeout = now + BUTTON_ON_DURATION;
+                            int brightness = mButtonBrightnessOverrideFromWindowManager >= 0
+                                    ? mButtonBrightnessOverrideFromWindowManager
+                                    : mDisplayPowerRequest.screenBrightness;
+                            mButtonsLight.setBrightness(brightness);
+                            mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
+                            if (brightness != 0) {
+                                nextTimeout = now + BUTTON_ON_DURATION;
+                            }
                         }
                         mUserActivitySummary |= USER_ACTIVITY_SCREEN_BRIGHT;
                     } else {
@@ -1682,9 +1680,6 @@ public final class PowerManagerService extends IPowerManager.Stub
 
             mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
 
-            mDisplayPowerRequest.electronBeamOffEnabled = mElectronBeamOffEnabled;
-            mDisplayPowerRequest.electronBeamMode = mElectronBeamMode;
-
             mDisplayReady = mDisplayPowerController.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
@@ -1899,9 +1894,9 @@ public final class PowerManagerService extends IPowerManager.Stub
             public void run() {
                 synchronized (this) {
                     if (shutdown) {
-                        ShutdownThread.shutdown(getUiContext(), confirm);
+                        ShutdownThread.shutdown(mContext, confirm);
                     } else {
-                        ShutdownThread.reboot(getUiContext(), reason, confirm);
+                        ShutdownThread.reboot(mContext, reason, confirm);
                     }
                 }
             }
@@ -1954,13 +1949,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         } catch (InterruptedException e) {
             Log.wtf(TAG, e);
         }
-    }
-
-    private Context getUiContext() {
-        if (mUiContext == null) {
-            mUiContext = ThemeUtils.createUiContext(mContext);
-        }
-        return mUiContext != null ? mUiContext : mContext;
     }
 
     /**
@@ -2099,9 +2087,24 @@ public final class PowerManagerService extends IPowerManager.Stub
      * @param brightness The overridden brightness, or -1 to disable the override.
      */
     public void setButtonBrightnessOverrideFromWindowManager(int brightness) {
-        // Do nothing.
-        // Button lights are not currently supported in the new implementation.
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            setButtonBrightnessOverrideFromWindowManagerInternal(brightness);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setButtonBrightnessOverrideFromWindowManagerInternal(int brightness) {
+        synchronized (mLock) {
+            if (mButtonBrightnessOverrideFromWindowManager != brightness) {
+                mButtonBrightnessOverrideFromWindowManager = brightness;
+                mDirty |= DIRTY_SETTINGS;
+                updatePowerStateLocked();
+            }
+        }
     }
 
     /**

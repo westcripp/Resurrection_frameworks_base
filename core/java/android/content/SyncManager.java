@@ -17,7 +17,6 @@
 package android.content;
 
 import com.android.internal.app.ThemeUtils;
-
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;

@@ -25,15 +25,20 @@ import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
 
 public class SettingsPanelView extends PanelView {
 
+    private QuickSettingsController mQS;
     private QuickSettingsContainerView mQSContainer;
 
     Drawable mHandleBar;
     int mHandleBarHeight;
     View mHandleView;
-
+    
     public SettingsPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -50,13 +55,26 @@ public class SettingsPanelView extends PanelView {
         mHandleView = findViewById(R.id.handle);
 
         setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
+
     }
 
-    void updateResources() {
-        if (mQSContainer != null) {
-            mQSContainer.updateResources();
+    public void setQuickSettings(QuickSettingsController qs) {
+        mQS = qs;
+    }
+
+    @Override
+    public void setBar(PanelBar panelBar) {
+        super.setBar(panelBar);
+
+        if (mQS != null) {
+            mQS.setBar(panelBar);
         }
-        requestLayout();
+    }
+
+    public void setImeWindowStatus(boolean visible) {
+        if (mQS != null) {
+            mQS.setImeWindowStatus(visible);
+        }
     }
 
     @Override
@@ -68,6 +86,12 @@ public class SettingsPanelView extends PanelView {
                 "settings,v=" + vel);
         }
         super.fling(vel, always);
+    }
+
+    public void setService(PhoneStatusBar phoneStatusBar) {
+        if (mQS != null) {
+            mQS.setService(phoneStatusBar);
+        }
     }
 
     // We draw the handle ourselves so that it's always glued to the bottom of the window.
@@ -90,4 +114,5 @@ public class SettingsPanelView extends PanelView {
         mHandleBar.draw(canvas);
         canvas.translate(0, -off);
     }
+
 }

@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.EventLog;
@@ -89,6 +90,7 @@ public class WebSettingsClassic extends WebSettings {
     // HTML5 API flags
     private boolean         mAppCacheEnabled = false;
     private boolean         mDatabaseEnabled = false;
+    private boolean         mWebSocketsEnabled = false;
     private boolean         mDomStorageEnabled = false;
     private boolean         mWorkersEnabled = false;  // only affects V8.
     private boolean         mGeolocationEnabled = true;
@@ -433,6 +435,9 @@ public class WebSettingsClassic extends WebSettings {
             buffer.append(" Build/");
             buffer.append(id);
         }
+        final String cmversion = SystemProperties.get("ro.cm.version");
+        if (cmversion != null && cmversion.length() > 0)
+            buffer.append("; CyanogenMod-" + cmversion.replaceAll("([0-9\\.]+?)-.*","$1"));
         String mobile = context.getResources().getText(
             com.android.internal.R.string.web_user_agent_target_content).toString();
         final String base = context.getResources().getText(
@@ -1284,6 +1289,17 @@ public class WebSettingsClassic extends WebSettings {
     }
 
     /**
+     * @see android.webkit.WebSettings#setWebSocketsEnabled(boolean)
+     */
+    @Override
+    public synchronized void setWebSocketsEnabled(boolean flag) {
+       if (mWebSocketsEnabled != flag) {
+           mWebSocketsEnabled = flag;
+           postSync();
+       }
+    }
+
+    /**
      * @see android.webkit.WebSettings#setDomStorageEnabled(boolean)
      */
     @Override
@@ -1316,6 +1332,14 @@ public class WebSettingsClassic extends WebSettings {
     @Override
     public synchronized boolean getDatabaseEnabled() {
         return mDatabaseEnabled;
+    }
+
+    /**
+     * @see android.webkit.WebSettings#getWebSocketsEnabled()
+     */
+    @Override
+    public synchronized boolean getWebSocketsEnabled() {
+        return mWebSocketsEnabled;
     }
 
     /**
@@ -1640,6 +1664,7 @@ public class WebSettingsClassic extends WebSettings {
     /**
      * Sets whether WebGL is enabled.
      * @param flag Set to true to enable WebGL.
+     * @hide
      */
     public synchronized void setWebGLEnabled(boolean flag) {
         if (mWebGLEnabled != flag) {

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
+ * This code has been modified. Portions copyright (C) 2012, ParanoidAndroid Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +88,6 @@ public class CommandQueue extends IStatusBar.Stub {
         public void removeNotification(IBinder key);
         public void disable(int state);
         public void animateExpandNotificationsPanel();
-        public void animateCollapsePanels();
         public void animateCollapsePanels(int flags);
         public void animateExpandSettingsPanel();
         public void setSystemUiVisibility(int vis, int mask);
@@ -96,6 +96,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void setHardKeyboardStatus(boolean available, boolean enabled);
         public void toggleNotificationShade();
         public void toggleRecentApps();
+        public void clearRecentApps();
         public void preloadRecentApps();
         public void showSearchPanel();
         public void hideSearchPanel();

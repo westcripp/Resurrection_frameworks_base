@@ -300,6 +300,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final float THUMBNAIL_ANIMATION_DECELERATE_FACTOR = 1.5f;
 
+
     private BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             mUiContext = null;
@@ -1617,8 +1618,9 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean targetChanged = false;
 
         // TODO(multidisplay): Wallpapers on main screen only.
-        final int dw = mPolicy.getWallpaperWidth(mRotation);
-        final int dh = mPolicy.getWallpaperHeight(mRotation);
+        final DisplayInfo displayInfo = getDefaultDisplayContentLocked().getDisplayInfo();
+        final int dw = displayInfo.appWidth;
+        final int dh = displayInfo.appHeight;
 
         // First find top-most window that has asked to be on top of the
         // wallpaper; all wallpapers go behind it.
@@ -1875,6 +1877,7 @@ public class WindowManagerService extends IWindowManager.Stub
             while (curWallpaperIndex > 0) {
                 curWallpaperIndex--;
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
+
                 if (visible) {
                     updateWallpaperOffsetLocked(wallpaper, dw, dh, false);
                 }
@@ -2038,8 +2041,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
-        final int dw = mPolicy.getWallpaperWidth(mRotation);
-        final int dh = mPolicy.getWallpaperHeight(mRotation);
+        final DisplayContent displayContent = changingTarget.mDisplayContent;
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final int dw = displayInfo.appWidth;
+        final int dh = displayInfo.appHeight;
 
         WindowState target = mWallpaperTarget;
         if (target != null) {
@@ -5438,11 +5443,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mAnimatorDurationScale };
     }
 
-    @Override
-    public void reboot(String reason) {
-        ShutdownThread.reboot(getUiContext(), reason, false);
-    }
-
     // Called by window manager policy. Not exposed externally.
     @Override
     public int getLidState() {
@@ -5478,11 +5478,24 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.shutdown(getUiContext(), confirm);
     }
 
-    // Called by window manager policy. Not exposed externally.
+    // Called by window manager policy.  Not exposed externally.
     @Override
     public void rebootSafeMode(boolean confirm) {
         ShutdownThread.rebootSafeMode(getUiContext(), confirm);
     }
+
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void reboot(boolean confirm) {
+        reboot(null, confirm);
+    }
+
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void reboot(String reason, boolean confirm) {
+        ShutdownThread.reboot(mContext, reason, confirm);
+    }
+
 
     public void setInputFilter(IInputFilter filter) {
         if (!checkCallingPermission(android.Manifest.permission.FILTER_EVENTS, "setInputFilter()")) {
@@ -5906,6 +5919,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // The screenshot API does not apply the current screen rotation.
             rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+            // Allow for abnormal hardware orientation
+            rot = (rot + (android.os.SystemProperties.getInt("ro.sf.hwrotation",0) / 90 )) % 4;
+
             int fw = frame.width();
             int fh = frame.height();
 

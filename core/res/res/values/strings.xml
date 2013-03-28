@@ -68,6 +68,23 @@
          could not be performed because FDN is enabled. This will be displayed in a toast. -->
     <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>
 
+    <!-- Names of default profiles. -->
+    <string name="profileNameDefault">Default</string>
+    <string name="profileNameWork">Work</string>
+    <string name="profileNameHome">Home</string>
+    <string name="profileNameSilent">Silent</string>
+    <string name="profileNameNight">Night</string>
+
+    <!-- Names of application groups. -->
+    <string name="profileGroupPhone">Phone</string>
+    <string name="profileGroupCalendar">Calendar</string>
+    <string name="profileGroupGmail">Gmail</string>
+    <string name="profileGroupEmail">Email</string>
+    <string name="profileGroupSMS">SMS</string>
+
+    <!-- Name of wildcard profile. -->
+    <string name="wildcardProfile">Other</string>
+
     <!-- Displayed when a phone feature such as call barring was activated. -->
     <string name="serviceEnabled">Service was enabled.</string>
     <!-- Displayed in front of the list of a set of service classes
@@ -292,6 +309,39 @@
     <string name="screen_lock">Screen lock</string>
     <!-- Button to turn off the phone, within the Phone Options dialog -->
     <string name="power_off">Power off</string>
+
+    <!-- Button to reboot the phone, within the Phone Options dialog -->
+    <string name="reboot_system" product="tablet">Reboot tablet</string>
+    <string name="reboot_system" product="default">Reboot phone</string>
+
+    <!-- label for item that toggles expand desktop mode -->
+    <string name="global_action_expanded_desktop">Full screen (Pie)</string>
+    <!-- status message in phone options dialog for when expand desktop mode is on -->
+    <string name="global_action_expanded_desktop_on">Enabled</string>
+    <!-- status message in phone options dialog for when expand desktop mode is off -->
+    <string name="global_action_expanded_desktop_off">Disabled</string>
+
+    <!-- Button to reboot the phone, within the Reboot Options dialog -->
+    <string name="reboot_reboot">Reboot</string>
+    <!-- Button to reboot the phone into recovery, within the Reboot Options dialog -->
+    <string name="reboot_recovery">Recovery</string>
+    <!-- Button to reboot the phone into bootloader, within the Reboot Options dialog -->
+    <string name="reboot_bootloader">Bootloader</string>
+    <!-- Button to reboot the phone into bootmenu, within the Reboot Options dialog -->
+    <string name="reboot_bootmenu">Bootmenu</string>
+    <!-- Button to reboot the phone into fastboot, within the Reboot Options dialog -->
+    <string name="reboot_fastboot">Fastboot</string>
+    <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
+    <string name="reboot_download">Download</string>
+    <!-- Button to reboot the phone into safe mode, within the Reboot Options dialog -->
+    <string name="reboot_safe_mode">@string/safeMode</string>
+
+    <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
+    <string name="reboot_progress">Rebooting\u2026</string>
+    <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
+    <string name="reboot_confirm" product="tablet">Your tablet will reboot.</string>
+    <string name="reboot_confirm" product="default">Your phone will reboot.</string>
+
     <!-- Spoken description for ringer silent option. [CHAR LIMIT=NONE] -->
     <string name="silent_mode_silent">Ringer off</string>
     <!-- Spoken description for ringer vibrate option. [CHAR LIMIT=NONE] -->
@@ -374,12 +424,6 @@
 
     <!-- status message in phone options dialog for when airplane mode is off -->
     <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
-
-    <!-- label for item that screenshots in phone options dialog -->
-    <string name="global_action_screenshot">Screenshot</string>
-
-    <!-- label for item that torches in phone options dialog -->
-    <string name="global_action_torch">Torch</string>
 
     <!-- label for item that toggles NavBar Hide -->
     <string name="global_actions_toggle_navbar_hide">Navigation Bar Controls</string>
@@ -545,7 +589,7 @@
     <string name="permgroupdesc_storage" product="default">Access the SD card.</string>
 
     <!--  Permissions -->
-
+    
     <!-- Superuser application permission, allows applications to call the superuser binary (su) -->
     <string name="permlab_accessSuperuser">full permissions to all device features and storage</string>
     <string name="permdesc_accessSuperuser">Superuser grants full access to all device features and storage, including the secure and sensitive hardware elements of your device. This permission is potentially dangerous.</string>
@@ -1408,6 +1452,16 @@
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_fm_radio_receiver">control FM receiver</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_fm_radio_receiver">Allows the application to control the FM receiver.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_fm_radio_transmitter">control FM transmitter</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_fm_radio_transmitter">Allows the application to control the FM transmitter.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_flashlight">control flashlight</string>
@@ -3302,16 +3356,16 @@
     <!-- See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title. -->
     <string name="extmedia_format_title" product="default">Format SD card?</string>
     <!-- See EXTMEDIA_FORMAT.   This is the message. [CHAR LIMIT=NONE] -->
-    <string name="extmedia_format_message" product="nosdcard">All files stored in your USB storage will be erased. This action can\'t be reversed!</string>
+    <string name="extmedia_format_message" product="nosdcard">All files stored in your USB storage (under path \'%1$s\') will be erased. This action can\'t be reversed!</string>
     <!-- See EXTMEDIA_FORMAT.   This is the message. -->
-    <string name="extmedia_format_message" product="default">All data on your card will be lost.</string>
+    <string name="extmedia_format_message" product="default">All data on your card (under path \'%1$s\') will be erased. This action can\'t be reversed!</string>
     <!-- See EXTMEDIA_FORMAT.    This is the button text to format the sd card. -->
     <string name="extmedia_format_button_format">Format</string>
 
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
-    <string name="adb_active_notification_title">USB debugging connected</string>
+    <string name="adb_active_notification_title">Android debugging enabled</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
-    <string name="adb_active_notification_message">Touch to disable USB debugging.</string>
+    <string name="adb_active_notification_message">Select to disable debugging.</string>
 
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
@@ -3732,6 +3786,9 @@
     <!-- Storage description for the SD card. [CHAR LIMIT=NONE] -->
     <string name="storage_sd_card">SD card</string>
 
+    <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_dock_card">Dock SD card</string>
+
     <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
     <string name="storage_usb">USB storage</string>
 
@@ -3862,21 +3919,6 @@
 
     <!-- "Done" button for MediaRouter chooser dialog when grouping routes. [CHAR LIMIT=NONE] -->
     <string name="media_route_chooser_grouping_done">Done</string>
-
-    <!-- Reboot -->
-    <string name="reboot">Reboot</string>
-
-    <!-- Reboot recovery option -->
-    <string name="reboot_recovery">Recovery</string>
-
-    <!-- Reboot recovery option -->
-    <string name="reboot_download">Download</string>
-
-    <!-- Reboot recovery option -->
-    <string name="reboot_bootloader">Bootloader</string>
-
-    <!-- Rebooting message -->
-    <string name="reboot_progress">Your device is rebooting</string>
 
     <!-- Content description of a MediaRouteButton for accessibility support -->
     <string name="media_route_button_content_description">Media output</string>
@@ -4044,6 +4086,19 @@
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
 
+    <!-- label for item that reboots the device in phone options dialog -->
+    <string name="global_action_reboot">Reboot</string>
+
+    <!-- label for item that screenshots in phone options dialog -->
+    <string name="global_action_screenshot">Screenshot</string>
+
+    <!-- label for item that opens the profile choosing dialog -->
+    <string name="global_action_choose_profile">Profile</string>
+
+    <!-- Hardware Rotation lock string -->
+    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
+    <string name="toast_rotation_locked">Display rotation locked</string>
+
     <!-- Vibration picker dialog title -->
     <string name="vibration_picker_title">Select vibration</string>
     <string name="vibration_picker_del_title">Delete vibration</string>
@@ -4051,7 +4106,4 @@
     <!-- In WiFi notification -->
     <string name="notify_turn_wifi_off_title">Turn Wi-Fi off</string>
 
-    <!-- Hardware Rotation lock string -->
-    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
-    <string name="toast_rotation_locked">Display rotation locked</string>
 </resources>

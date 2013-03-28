@@ -398,8 +398,9 @@ public interface WindowManagerPolicy {
         public void switchKeyboardLayout(int deviceId, int direction);
 
         public void shutdown(boolean confirm);
-        public void reboot(String reason);
         public void rebootSafeMode(boolean confirm);
+        public void reboot(boolean confirm);
+        public void reboot(String reason, boolean confirm);
     }
 
     /**
@@ -611,18 +612,6 @@ public interface WindowManagerPolicy {
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation);
-
-    public int getWallpaperHeight(int rotation);
-
-    public int getWallpaperWidth(int rotation);
-
-    public int getWallpaperTop(int rot);
-
-    public int getWallpaperLeft(int rot);
-
-    public int getWallpaperBottom(int rot);
-
-    public int getWallpaperRight(int rot);
 
     /**
      * Return whether the given window should forcibly hide everything

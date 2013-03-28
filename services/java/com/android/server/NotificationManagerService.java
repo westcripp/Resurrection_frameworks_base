@@ -1,5 +1,7 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * This code has been modified. Portions copyright (C) 2012, CyanogenMod Project.
+ * This code has been modified. Portions copyright (C) 2012, ParanoidAndroid Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +30,8 @@ import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.ProfileGroup;
+import android.app.ProfileManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -85,8 +89,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import libcore.io.IoUtils;
 
@@ -162,6 +166,18 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     private ArrayList<NotificationRecord> mLights = new ArrayList<NotificationRecord>();
     private NotificationRecord mLedNotification;
+
+    private boolean mQuietHoursEnabled = false;
+    // Minutes from midnight when quiet hours begin.
+    private int mQuietHoursStart = 0;
+    // Minutes from midnight when quiet hours end.
+    private int mQuietHoursEnd = 0;
+    // Don't play sounds.
+    private boolean mQuietHoursMute = true;
+    // Don't vibrate.
+    private boolean mQuietHoursStill = true;
+    // Dim LED if hardware supports it.
+    private boolean mQuietHoursDim = true;
 
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
@@ -310,15 +326,6 @@ public class NotificationManagerService extends INotificationManager.Stub
         writeBlockDb();
     }
 
-    private boolean mQuietHoursEnabled = false;
-    // Minutes from midnight when quiet hours begin.
-    private int mQuietHoursStart = 0;
-    // Minutes from midnight when quiet hours end.
-    private int mQuietHoursEnd = 0;
-    // Don't play sounds.
-    private boolean mQuietHoursMute = true;
-    // Dim LED if hardware supports it.
-    private boolean mQuietHoursDim = true;
 
     private HashMap<String, Long> mAnnoyingNotifications = new HashMap<String, Long>();
     private long mAnnoyingNotificationThreshold = -1;
@@ -695,6 +702,54 @@ public class NotificationManagerService extends INotificationManager.Stub
         return out;
     }
 
+    class QuietHoursSettingsObserver extends ContentObserver {
+        QuietHoursSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUIET_HOURS_ENABLED), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUIET_HOURS_START), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUIET_HOURS_END), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUIET_HOURS_MUTE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUIET_HOURS_STILL), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUIET_HOURS_DIM), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD), false, this);
+            update();
+        }
+
+        @Override public void onChange(boolean selfChange) {
+            update();
+            updateNotificationPulse();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            mQuietHoursEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_ENABLED, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mQuietHoursStart = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_START, 0, UserHandle.USER_CURRENT_OR_SELF);
+            mQuietHoursEnd = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_END, 0, UserHandle.USER_CURRENT_OR_SELF);
+            mQuietHoursMute = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_MUTE, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mQuietHoursStill = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_STILL, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mQuietHoursDim = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_DIM, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mAnnoyingNotificationThreshold = Settings.System.getLong(resolver,
+                    Settings.System.MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD, 0);
+        }
+    }
+
     NotificationManagerService(Context context, StatusBarManagerService statusBar,
             LightsService lights)
     {
@@ -759,12 +814,13 @@ public class NotificationManagerService extends INotificationManager.Stub
         mContext.registerReceiver(mIntentReceiver, pkgFilter);
         IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mIntentReceiver, sdFilter);
-        ThemeUtils.registerThemeChangeReceiver(mContext, mThemeChangeReceiver);
 
         SettingsObserver observer = new SettingsObserver(mHandler);
         observer.observe();
         QuietHoursSettingsObserver qhObserver = new QuietHoursSettingsObserver(mHandler);
         qhObserver.observe();
+
+        ThemeUtils.registerThemeChangeReceiver(mContext, mThemeChangeReceiver);
     }
 
     void systemReady() {
@@ -1097,6 +1153,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         synchronized (mNotificationList) {
             final boolean inQuietHours = inQuietHours();
+
             NotificationRecord r = new NotificationRecord(pkg, tag, id, 
                     callingUid, callingPid, userId,
                     score,
@@ -1170,6 +1227,18 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
             }
 
+            try {
+                final ProfileManager profileManager =
+                        (ProfileManager) mContext.getSystemService(Context.PROFILE_SERVICE);
+
+                ProfileGroup group = profileManager.getActiveProfileGroup(pkg);
+                if (group != null) {
+                    notification = group.processNotification(notification);
+                }
+            } catch(Throwable th) {
+                Log.e(TAG, "An error occurred profiling the notification.", th);
+            }
+
             // If we're not supposed to beep, vibrate, etc. then don't.
             if (((mDisabledNotifications & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) == 0)
                     && (!(old != null
@@ -1184,7 +1253,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                         .getSystemService(Context.AUDIO_SERVICE);
                 // sound
                 final boolean useDefaultSound =
-                        (notification.defaults & Notification.DEFAULT_SOUND) != 0;
+                    (notification.defaults & Notification.DEFAULT_SOUND) != 0;
 
                 Uri soundUri = null;
                 boolean hasValidSound = false;
@@ -1237,17 +1306,17 @@ public class NotificationManagerService extends INotificationManager.Stub
                 final boolean convertSoundToVibration =
                            !hasCustomVibrate
                         && hasValidSound
+                        && shouldConvertSoundToVibration()
                         && (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)
                         && (Settings.System.getBoolean(mContext.getContentResolver(), Settings.System.NOTIFICATION_CONVERT_SOUND_TO_VIBRATION, false));
 
                 // The DEFAULT_VIBRATE flag trumps any custom vibration AND the fallback.
                 final boolean useDefaultVibrate =
                         (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
-
-                if ((useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
+                if (!(inQuietHours && mQuietHoursStill)
+                        && (useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
                         && !(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)) {
                     mVibrateNotification = r;
-
                     if (useDefaultVibrate || convertSoundToVibration) {
                         // Escalate privileges so we can use the vibrator even if the notifying app
                         // does not have the VIBRATE permission.
@@ -1308,6 +1377,11 @@ public class NotificationManagerService extends INotificationManager.Stub
             mAnnoyingNotifications.put(pkg, currentTime);
             return false;
         }
+    }
+
+    private boolean shouldConvertSoundToVibration() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.NOTIFICATION_CONVERT_SOUND_TO_VIBRATION, 1) != 0;
     }
 
     private boolean inQuietHours() {
@@ -1725,51 +1799,6 @@ public class NotificationManagerService extends INotificationManager.Stub
             pw.println("  mVibrateNotification=" + mVibrateNotification);
             pw.println("  mDisabledNotifications=0x" + Integer.toHexString(mDisabledNotifications));
             pw.println("  mSystemReady=" + mSystemReady);
-        }
-    }
-
-    class QuietHoursSettingsObserver extends ContentObserver {
-        QuietHoursSettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUIET_HOURS_ENABLED), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUIET_HOURS_START), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUIET_HOURS_END), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUIET_HOURS_NOTIFICATIONS), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUIET_HOURS_DIM), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD), false, this);
-            update();
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            update();
-            updateNotificationPulse();
-        }
-
-        public void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-            mQuietHoursEnabled = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_ENABLED, 0) != 0;
-            mQuietHoursStart = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_START, 0);
-            mQuietHoursEnd = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_END, 0);
-            mQuietHoursMute = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_NOTIFICATIONS, 0) != 0;
-            mQuietHoursDim = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_DIM, 0) != 0;
-            mAnnoyingNotificationThreshold = Settings.System.getLong(resolver,
-                    Settings.System.MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD, 0);
         }
     }
 }

@@ -1,4 +1,19 @@
-// Copyright 2012 Google Inc. All Rights Reserved.
+/*
+ * Copyright (C) 2012 The Android Open Source Project
+ * This code has been modified.  Portions copyright (C) 2012, ParanoidAndroid Project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.server.wm;
 
@@ -15,6 +30,7 @@ import static com.android.server.wm.WindowManagerService.H.UPDATE_ANIM_PARAMETER
 import android.content.Context;
 import android.os.Debug;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -387,14 +403,19 @@ public class WindowAnimator {
                         mService.mFocusMayChange = true;
                     }
                     if (win.isReadyForDisplay()) {
-                        if (nowAnimating) {
-                            if (winAnimator.mAnimationIsEntrance) {
-                                mForceHiding = KEYGUARD_ANIMATING_IN;
+                        if(Settings.System.getInt(mContext.getContentResolver(),
+                                Settings.System.LOCKSCREEN_SEE_THROUGH, 0) == 0) {
+                            if (nowAnimating) {
+                                if (winAnimator.mAnimationIsEntrance) {
+                                    mForceHiding = KEYGUARD_ANIMATING_IN;
+                                } else {
+                                    mForceHiding = KEYGUARD_ANIMATING_OUT;
+                                }
                             } else {
-                                mForceHiding = KEYGUARD_ANIMATING_OUT;
+                                mForceHiding = KEYGUARD_SHOWN;
                             }
                         } else {
-                            mForceHiding = KEYGUARD_SHOWN;
+                            mForceHiding = KEYGUARD_NOT_SHOWN;
                         }
                     }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,

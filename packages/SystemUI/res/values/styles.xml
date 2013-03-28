@@ -86,18 +86,6 @@
         <item name="android:textColor">@android:color/holo_red_light</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.WifiText" parent="@*android:style/TextAppearance.StatusBar.Icon">
-        <item name="android:textSize">16dp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
-    </style>
-
-    <style name="TextAppearance.StatusBar.SignalText" parent="@*android:style/TextAppearance.StatusBar.Icon">
-        <item name="android:textSize">16dp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
-    </style>
-
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
@@ -109,22 +97,6 @@
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textSize">12dp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#cccccc</item>
-        <item name="android:textAllCaps">true</item>
-    </style>
-
-    <style name="TextAppearance.SystemBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
-
-    <style name="TextAppearance.SystemBar.Expanded.Clock">
-        <item name="android:textSize">44dp</item>
-        <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
-    <style name="TextAppearance.SystemBar.Expanded.Date">
-        <item name="android:textSize">20dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#cccccc</item>
         <item name="android:textAllCaps">true</item>
@@ -145,9 +117,11 @@
         <item name="android:paddingRight">6dp</item>
         <item name="android:paddingBottom">2dp</item>
         <item name="android:drawablePadding">12dp</item>
+        <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/toggle_text</item>
+        <item name="android:textColor">#CCCCCC</item>
         <item name="android:textAllCaps">true</item>
+        <item name="android:singleLine">true</item>
         <item name="android:ellipsize">marquee</item>
         <item name="android:fadingEdge">horizontal</item>
     </style>
@@ -188,8 +162,6 @@
         <item name="android:textSize">14dp</item>
         <item name="android:textColor">#ff3a3b39</item>
     </style>
-    
-    
 
     <style name="BaseBrightnessDialogContainer">
         <item name="android:layout_width">match_parent</item>
@@ -225,17 +197,6 @@
         parent="@*android:style/TextAppearance.StatusBar.Ticker">
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">14dp</item>
-    </style>
-
-    <style name="TextAppearance.StatusBar.Toggle" parent="@*android:style/TextAppearance.StatusBar.Icon">
-        <item name="android:textSize">16dp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
-    </style>
-
-     <style name="brucekey_icon">
-       <item name="android:layout_width">wrap_content</item>
-       <item name="android:layout_height">wrap_content</item>
     </style>
     
     <style name="ClingButton">

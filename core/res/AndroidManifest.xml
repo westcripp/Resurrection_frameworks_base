@@ -803,6 +803,22 @@
         android:label="@string/permlab_vibrate"
         android:description="@string/permdesc_vibrate" />
 
+    <!-- Allows access to the FM Radio receiver
+        @hide Pending API council approval -->
+    <permission android:name="com.stericsson.permission.FM_RADIO_RECEIVER"
+        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_fm_radio_receiver"
+        android:description="@string/permdesc_fm_radio_receiver" />
+
+    <!-- Allows access to the FM Radio transmitter
+         @hide Pending API council approval -->
+    <permission android:name="com.stericsson.permission.FM_RADIO_TRANSMITTER"
+        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_fm_radio_transmitter"
+        android:description="@string/permdesc_fm_radio_transmitter" />
+
     <!-- Allows access to the flashlight -->
     <permission android:name="android.permission.FLASHLIGHT"
         android:permissionGroup="android.permission-group.AFFECTS_BATTERY"
@@ -1545,9 +1561,9 @@
         android:protectionLevel="signature|system"
         android:label="@string/permlab_anyCodecForPlayback"
         android:description="@string/permdesc_anyCodecForPlayback" />
-
-<!-- Allows an application to access Superuser binary.
-        This is a hack to avoid Android Issue #25906 -->
+        
+    <!-- Allows an application to access Superuser binary. This is a hack to avoid
+         Android Issue #25906 {@link https://code.google.com/p/android/issues/detail?id=25906 } -->
     <permission android:name="android.permission.ACCESS_SUPERUSER"
         android:protectionLevel="normal"
         android:label="@string/permlab_accessSuperuser"

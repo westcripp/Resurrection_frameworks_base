@@ -28,6 +28,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Handler;
@@ -40,6 +42,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.server.search.SearchManagerService;
 import android.service.dreams.DreamService;
 import android.util.DisplayMetrics;
@@ -73,6 +76,8 @@ import dalvik.system.Zygote;
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
+import com.stericsson.hardware.fm.FmReceiverService;
+import com.stericsson.hardware.fm.FmTransmitterService;
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
@@ -84,6 +89,19 @@ class ServerThread extends Thread {
     void reportWtf(String msg, Throwable e) {
         Slog.w(TAG, "***********************************************");
         Log.wtf(TAG, "BOOT FAILURE " + msg, e);
+    }
+
+    private class AdbPortObserver extends ContentObserver {
+        public AdbPortObserver() {
+            super(null);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            int adbPort = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ADB_PORT, 0);
+            // setting this will control whether ADB runs on TCP/IP or USB
+            SystemProperties.set("service.adb.tcp.port", Integer.toString(adbPort));
+        }
     }
 
     @Override
@@ -352,6 +370,7 @@ class ServerThread extends Thread {
         StatusBarManagerService statusBar = null;
         InputMethodManagerService imm = null;
         AppWidgetService appWidget = null;
+        ProfileManagerService profile = null;
         NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
@@ -528,6 +547,21 @@ class ServerThread extends Thread {
             }
 
             try {
+                Slog.i(TAG, "FM receiver Service");
+                ServiceManager.addService("fm_receiver",
+                        new FmReceiverService(context));
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting FM receiver Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "FM transmitter Service");
+                ServiceManager.addService("fm_transmitter",
+                        new FmTransmitterService(context));
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting FM transmitter Service", e);
+            }
+            try {
                 Slog.i(TAG, "UpdateLock Service");
                 ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
                         new UpdateLockService(context));
@@ -556,6 +590,14 @@ class ServerThread extends Thread {
                     contentService.systemReady();
             } catch (Throwable e) {
                 reportWtf("making Content Service ready", e);
+            }
+
+            try {
+                Slog.i(TAG, "Profile Manager");
+                profile = new ProfileManagerService(context);
+                ServiceManager.addService(Context.PROFILE_SERVICE, profile);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Profile Manager", e);
             }
 
             try {
@@ -772,6 +814,15 @@ class ServerThread extends Thread {
                 Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
             }
         }
+
+        // make sure the ADB_ENABLED setting value matches the secure property value
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
+                Integer.parseInt(SystemProperties.get("service.adb.tcp.port", "-1")));
+
+        // register observer to listen for settings changes
+        mContentResolver.registerContentObserver(
+            Settings.Secure.getUriFor(Settings.Secure.ADB_PORT),
+            false, new AdbPortObserver());
 
         // Before things start rolling, be sure we have decided whether
         // we are in safe mode.

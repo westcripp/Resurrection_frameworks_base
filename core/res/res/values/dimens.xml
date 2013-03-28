@@ -3,6 +3,7 @@
 /* //device/apps/common/assets/res/any/dimens.xml
 **
 ** Copyright 2006, The Android Open Source Project
+** This code has been modified.  Portions copyright (C) 2012, ParanoidAndroid Project.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -19,9 +20,9 @@
 -->
 <resources>
     <!-- The width that is used when creating thumbnails of applications. -->
-    <dimen name="thumbnail_width">164dp</dimen>
+    <dimen name="thumbnail_width">170dp</dimen>
     <!-- The height that is used when creating thumbnails of applications. -->
-    <dimen name="thumbnail_height">145dp</dimen>
+    <dimen name="thumbnail_height">150dp</dimen>
     <!-- The standard size (both width and height) of an application icon that
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
@@ -69,9 +70,6 @@
     <dimen name="password_keyboard_horizontalGap">3dip</dimen>
     <!-- Default vertical gap between keys in the password keyboard (used by keyguard) -->
     <dimen name="password_keyboard_verticalGap">9dip</dimen>
-
-    <!-- Default maximum height for the widget pager in the keyguard -->
-    <dimen name="keyguard_widget_pager_max_height">480dp</dimen>
 
     <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_outerring_diameter">270dp</dimen>
@@ -243,6 +241,9 @@
     <dimen name="notification_title_text_size">18dp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12dp</dimen>
+
+    <!-- Lockscreen target insets -->
+    <item type="dimen" name="lockscreen_target_inset">30dp</item>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
