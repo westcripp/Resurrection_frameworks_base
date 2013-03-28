@@ -827,10 +827,16 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
         // If preference is no sound - just exit here
         if (Settings.System.getInt(mContext.getContentResolver(),
+<<<<<<< HEAD
                  Settings.System.VOLUME_ADJUST_SOUNDS_ENABLED, 1) == 0) {
              return;
          }
 
+=======
+             Settings.System.VOLUME_ADJUST_SOUNDS_ENABLED, 1) == 0) {
+             return;
+        }
+>>>>>>> 87c05b62ce54226c6c7fcda8079c3d20229a9107
         if (hasMessages(MSG_STOP_SOUNDS)) {
             removeMessages(MSG_STOP_SOUNDS);
             // Force stop right now
