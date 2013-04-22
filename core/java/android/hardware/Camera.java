@@ -1487,6 +1487,7 @@ public class Camera {
      * @see #getParameters()
      */
     public void setParameters(Parameters params) {
+        Log.v(TAG, "setParameters:"+params.flatten());
         native_setParameters(params.flatten());
     }
 
@@ -1792,12 +1793,6 @@ public class Camera {
         /** @hide */
         public static final String ISO_HJR = "ISO_HJR";
         /** @hide */
-        public static final String ISO_SPORTS = "ISO_SPORTS";
-        /** @hide */
-        public static final String ISO_NIGHT = "ISO_NIGHT";
-        /** @hide */
-        public static final String ISO_MOVIE = "ISO_MOVIE";
-        /** @hide */
         public static final String ISO_100 = "ISO100";
         /** @hide */
         public static final String ISO_200 = "ISO200";
@@ -1807,10 +1802,6 @@ public class Camera {
         public static final String ISO_800 = "ISO800";
         /** @hide */
         public static final String ISO_1600 = "ISO1600";
-        /** @hide */
-        public static final String ISO_3200 = "ISO3200";
-        /** @hide */
-        public static final String ISO_6400 = "ISO6400";
 
         /**
          * Scene mode is off.
@@ -2925,6 +2916,7 @@ public class Camera {
          * @see #getSceneMode()
          */
         public void setSceneMode(String value) {
+            if(getSupportedSceneModes() == null) return;
             set(KEY_SCENE_MODE, value);
         }
 
@@ -2962,6 +2954,7 @@ public class Camera {
          * @see #getFlashMode()
          */
         public void setFlashMode(String value) {
+            if(getSupportedFlashModes() == null) return;
             set(KEY_FLASH_MODE, value);
         }
 

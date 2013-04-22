@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.policy;
 
 import java.lang.ref.WeakReference;
@@ -21,7 +22,6 @@ import android.text.SpannableStringBuilder;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
-import android.util.ColorUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -41,12 +41,12 @@ public class SignalText extends TextView {
     private int style;
     private Handler mHandler;
     private Context mContext;
-    protected int mSignalColor = com.android.internal.R.color.holo_blue_light;
+    protected int mSignalColor;
     private PhoneStateIntentReceiver mPhoneStateReceiver;
 
     private SignalText mSignalText;
 
-    private ColorUtils.ColorSettingInfo mLastTextColor;
+    private SettingsObserver mSettingsObserver;
 
     private static class MyHandler extends Handler {
         private WeakReference<SignalText> mSignalText;
@@ -78,38 +78,6 @@ public class SignalText extends TextView {
     public SignalText(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
-
-        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
-        settingsObserver.observe();
-
-        // Only watch for per app color changes when the setting is in check
-        if (ColorUtils.getPerAppColorState(mContext)) {
-
-            mLastTextColor = ColorUtils.getColorSettingInfo(mContext, Settings.System.STATUS_ICON_COLOR);
-
-            updateTextColor();
-
-            mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.STATUS_ICON_COLOR), false, new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateTextColor();
-                    }});
-        }
-    }
-
-    private void updateTextColor() {
-        ColorUtils.ColorSettingInfo colorInfo = ColorUtils.getColorSettingInfo(mContext,
-                Settings.System.STATUS_ICON_COLOR);
-        if (!colorInfo.lastColorString.equals(mLastTextColor.lastColorString)) {
-            if (colorInfo.isLastColorNull) {
-                SettingsObserver settingsObserver = new SettingsObserver(new Handler());
-                settingsObserver.observe();
-            } else {
-                setTextColor(colorInfo.lastColor);
-            }
-            mLastTextColor = colorInfo;
-        }
     }
 
     @Override
@@ -118,9 +86,10 @@ public class SignalText extends TextView {
 
         if (!mAttached) {
             mAttached = true;
+            mSignalColor = getTextColors().getDefaultColor();
             mHandler = new MyHandler(this);
-            SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-            settingsObserver.observe();
+            mSettingsObserver = new SettingsObserver(mHandler);
+            mSettingsObserver.observe();
             mPhoneStateReceiver = new PhoneStateIntentReceiver(mContext, mHandler);
             mPhoneStateReceiver.notifySignalStrength(EVENT_SIGNAL_STRENGTH_CHANGED);
             mPhoneStateReceiver.registerIntent();
@@ -134,6 +103,7 @@ public class SignalText extends TextView {
         if (mAttached) {
             mAttached = false;
             mPhoneStateReceiver.unregisterIntent();
+            mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
         }
     }
 
@@ -150,7 +120,6 @@ public class SignalText extends TextView {
             resolver.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.STATUSBAR_SIGNAL_TEXT_COLOR), false,
                     this);
-            updateSettings();
         }
 
         @Override
@@ -160,15 +129,14 @@ public class SignalText extends TextView {
     }
 
     private void updateSettings() {
+        int newColor = 0;
         ContentResolver resolver = getContext().getContentResolver();
-        mSignalColor = Settings.System.getInt(resolver,
-                Settings.System.STATUSBAR_SIGNAL_TEXT_COLOR,
-                0xFF33B5E5);
-        if (mSignalColor == Integer.MIN_VALUE) {
-            // flag to reset the color
-            mSignalColor = 0xFF33B5E5;
+        newColor = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_SIGNAL_TEXT_COLOR,mSignalColor);
+        if (newColor < 0 && newColor != mSignalColor) {
+            mSignalColor = newColor;
+            setTextColor(mSignalColor);
         }
-        setTextColor(mSignalColor);
         updateSignalText();
     }
 

@@ -20,8 +20,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
-import android.app.Profile;
-import android.app.ProfileManager;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetHost;
@@ -33,14 +31,10 @@ import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -61,6 +55,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.R;
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -268,7 +263,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         }
         mAppWidgetContainer.setVisibility(VISIBLE);
-        mAppWidgetContainerHidden.setVisibility(GONE);
+        removeView(mAppWidgetContainerHidden);
         mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
         mAppWidgetContainer.setDeleteDropTarget(deleteDropTarget);
         mAppWidgetContainer.setMinScale(0.5f);
@@ -294,7 +289,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
         }
 
-        updateBackground();
         addDefaultWidgets();
 
         addWidgetsFromSettings();
@@ -313,13 +307,21 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         mExpandChallengeView = (View) findViewById(R.id.expand_challenge_handle);
         if (mExpandChallengeView != null) {
-            if (Settings.System.getBoolean(getContext().getContentResolver(),
-                Settings.System.LOCKSCREEN_LONGPRESS_CHALLENGE, false)) {
-                mExpandChallengeView.setOnLongClickListener(mFastUnlockClickListener);
-            }
+            mExpandChallengeView.setOnLongClickListener(mFastUnlockClickListener);
         }
 
         minimizeChallengeIfNeeded();
+    }
+
+    private boolean shouldEnableAddWidget() {
+        mUnlimitedWidgets = Settings.System.getBoolean(getContext().getContentResolver(),
+                                  Settings.System.LOCKSCREEN_UNLIMITED_WIDGETS, false);
+        if (mUnlimitedWidgets) {
+            MAX_WIDGETS = numWidgets() + 1;
+        } else {
+            MAX_WIDGETS = 5;
+        }
+        return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
     }
 
     private final OnLongClickListener mFastUnlockClickListener = new OnLongClickListener() {
@@ -334,43 +336,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             return true;
         }
     };
-
-    private void updateBackground() {
-        String background = Settings.System.getStringForUser(getContext().getContentResolver(),
-                Settings.System.LOCKSCREEN_BACKGROUND, UserHandle.USER_CURRENT);
-
-        if (background == null) {
-            return;
-        }
-
-        if (!background.isEmpty()) {
-            try {
-                setBackgroundColor(Integer.parseInt(background));
-            } catch(NumberFormatException e) {
-                Log.e(TAG, "Invalid background color " + background);
-            }
-        } else {
-            try {
-                Context settingsContext = getContext().createPackageContext("com.android.settings", 0);
-                String wallpaperFile = settingsContext.getFilesDir() + "/lockwallpaper";
-                Bitmap backgroundBitmap = BitmapFactory.decodeFile(wallpaperFile);
-                setBackgroundDrawable(new BitmapDrawable(backgroundBitmap));
-            } catch (NameNotFoundException e) {
-            // Do nothing here
-            }
-        }
-    }
-
-    private boolean shouldEnableAddWidget() {
-        mUnlimitedWidgets = Settings.System.getBoolean(getContext().getContentResolver(),
-                                  Settings.System.LOCKSCREEN_UNLIMITED_WIDGETS, false);
-        if (mUnlimitedWidgets) {
-            MAX_WIDGETS = numWidgets() + 1;
-        } else {
-            MAX_WIDGETS = 5;
-        }
-        return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
-    }
 
     private int getDisabledFeatures(DevicePolicyManager dpm) {
         int disabledFeatures = DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
@@ -868,7 +833,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         int layoutId = getLayoutIdFor(securityMode);
         if (view == null && layoutId != 0) {
-            final LayoutInflater inflater = LayoutInflater.from(mContext);
+            final LayoutInflater inflater = LayoutInflater.from(ThemeUtils.createUiContext(mContext));
             if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
             View v = inflater.inflate(layoutId, mSecurityViewContainer, false);
             mSecurityViewContainer.addView(v);
@@ -1003,11 +968,29 @@ public class KeyguardHostView extends KeyguardViewBase {
         showPrimarySecurityScreen(false);
     }
 
+    private boolean isSecure() {
+        SecurityMode mode = mSecurityModel.getSecurityMode();
+        switch (mode) {
+            case Pattern:
+                return mLockPatternUtils.isLockPatternEnabled();
+            case Password:
+            case PIN:
+                return mLockPatternUtils.isLockPasswordEnabled();
+            case SimPin:
+            case SimPuk:
+            case Account:
+                return true;
+            case None:
+                return false;
+            default:
+                throw new IllegalStateException("Unknown security mode " + mode);
+        }
+    }
 
     @Override
     public void wakeWhenReadyTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "onWakeKey");
-        if (keyCode == KeyEvent.KEYCODE_MENU && mSecurityModel.getSecurityMode() != SecurityMode.None) {
+        if (keyCode == KeyEvent.KEYCODE_MENU && isSecure()) {
             if (DEBUG) Log.d(TAG, "switching screens to unlock screen because wake key was MENU");
             showSecurityScreen(SecurityMode.None);
         } else {
@@ -1583,14 +1566,10 @@ public class KeyguardHostView extends KeyguardViewBase {
                 com.android.internal.R.bool.config_disableMenuKeyInLockScreen);
         final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
-        final boolean menuOverride = Settings.System.getInt(getContext().getContentResolver(), Settings.System.MENU_UNLOCK_SCREEN, 0) == 1;
-        return !configDisabled || isTestHarness || fileOverride || menuOverride;
+        return !configDisabled || isTestHarness || fileOverride;
     }
 
-    private boolean shouldEnableHomeKey() {
-        final boolean homeOverride = Settings.System.getInt(getContext().getContentResolver(), Settings.System.HOME_UNLOCK_SCREEN, 0) == 1;
-        return homeOverride;
-    }
+
 
     public void goToUserSwitcher() {
         mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_multi_user_selector));
@@ -1604,15 +1583,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     public boolean handleMenuKey() {
         // The following enables the MENU key to work for testing automation
         if (shouldEnableMenuKey()) {
-            showNextSecurityScreenOrFinish(false);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean handleHomeKey() {
-        // The following enables the HOME key to work for testing automation
-        if (shouldEnableHomeKey()) {
             showNextSecurityScreenOrFinish(false);
             return true;
         }

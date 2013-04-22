@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
- * This code has been modified. Portions copyright (C) 2012, ParanoidAndroid Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +21,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
@@ -54,16 +52,15 @@ public class RecentsVerticalScrollView extends ScrollView
     private RecentsScrollViewPerformanceHelper mPerformanceHelper;
     private HashSet<View> mRecycledViews;
     private int mNumItemsInOneScreenful;
-    private Handler mHandler;
 
     public RecentsVerticalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+
         mPerformanceHelper = RecentsScrollViewPerformanceHelper.create(context, attrs, this, true);
         mRecycledViews = new HashSet<View>();
-        mHandler = new Handler();
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
@@ -185,39 +182,6 @@ public class RecentsVerticalScrollView extends ScrollView
     @Override
     public void removeViewInLayout(final View view) {
         dismissChild(view);
-    }
-
-    @Override
-    public void removeAllViewsInLayout() {
-        smoothScrollTo(0, 0);
-        Thread clearAll = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int count = mLinearLayout.getChildCount();
-                // if we have more than one app, don't kill the current one
-                if(count > 1) count--;
-                View[] refView = new View[count];
-                for (int i = 0; i < count; i++) {
-                    refView[i] = mLinearLayout.getChildAt(i);
-                }
-                for (int i = 0; i < count; i++) {
-                    final View child = refView[i];
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            dismissChild(child);
-                        }
-                    });
-                    try {
-                        Thread.sleep(150);
-                    } catch (InterruptedException e) {
-                        // User will see the app fading instantly after the previous
-                        // one. This will probably never happen
-                    }
-                }
-            }
-        });
-        clearAll.start();
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {

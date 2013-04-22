@@ -1818,7 +1818,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public final float getX() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_X, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_X, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1828,7 +1828,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getY() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_Y, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_Y, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1838,7 +1838,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_PRESSURE
      */
     public final float getPressure() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1848,7 +1848,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_SIZE
      */
     public final float getSize() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_SIZE, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_SIZE, 0, HISTORY_CURRENT);
     }
     
     /**
@@ -1858,7 +1858,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MAJOR
      */
     public final float getTouchMajor() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1868,7 +1868,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MINOR
      */
     public final float getTouchMinor() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, 0, HISTORY_CURRENT);
     }
     
     /**
@@ -1878,7 +1878,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MAJOR
      */
     public final float getToolMajor() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1888,7 +1888,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MINOR
      */
     public final float getToolMinor() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1898,7 +1898,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_ORIENTATION
      */
     public final float getOrientation() {
-        return _nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1911,7 +1911,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getAxisValue(int axis) {
-        return _nativeGetAxisValue(mNativePtr, axis, 0, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, axis, 0, HISTORY_CURRENT);
     }
 
     /**
@@ -1931,10 +1931,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
     public final int getPointerId(int pointerIndex) {
-        int ret = nativeGetPointerId(mNativePtr, pointerIndex);
-        if (mustAddPointerId())
-        	ret++;
-        return ret;
+        return nativeGetPointerId(mNativePtr, pointerIndex);
     }
 
     /**
@@ -1981,7 +1978,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public final float getX(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_X, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_X, pointerIndex, HISTORY_CURRENT);
     }
 
     /**
@@ -1996,7 +1993,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getY(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_Y, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_Y, pointerIndex, HISTORY_CURRENT);
     }
 
     /**
@@ -2013,7 +2010,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_PRESSURE
      */
     public final float getPressure(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, pointerIndex, HISTORY_CURRENT);
     }
 
     /**
@@ -2031,7 +2028,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_SIZE
      */
     public final float getSize(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_SIZE, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_SIZE, pointerIndex, HISTORY_CURRENT);
     }
     
     /**
@@ -2045,7 +2042,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MAJOR
      */
     public final float getTouchMajor(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, pointerIndex, HISTORY_CURRENT);
     }
     
     /**
@@ -2059,7 +2056,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MINOR
      */
     public final float getTouchMinor(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, pointerIndex, HISTORY_CURRENT);
     }
     
     /**
@@ -2075,7 +2072,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MAJOR
      */
     public final float getToolMajor(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, pointerIndex, HISTORY_CURRENT);
     }
     
     /**
@@ -2091,7 +2088,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MINOR
      */
     public final float getToolMinor(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, pointerIndex, HISTORY_CURRENT);
     }
     
     /**
@@ -2110,7 +2107,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_ORIENTATION
      */
     public final float getOrientation(int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, pointerIndex, HISTORY_CURRENT);
     }
 
     /**
@@ -2126,7 +2123,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getAxisValue(int axis, int pointerIndex) {
-        return _nativeGetAxisValue(mNativePtr, axis, pointerIndex, HISTORY_CURRENT);
+        return nativeGetAxisValue(mNativePtr, axis, pointerIndex, HISTORY_CURRENT);
     }
 
     /**
@@ -2307,7 +2304,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public final float getHistoricalX(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_X, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_X, 0, pos);
     }
 
     /**
@@ -2322,7 +2319,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getHistoricalY(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_Y, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_Y, 0, pos);
     }
 
     /**
@@ -2337,7 +2334,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_PRESSURE
      */
     public final float getHistoricalPressure(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, 0, pos);
     }
 
     /**
@@ -2352,7 +2349,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_SIZE
      */
     public final float getHistoricalSize(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_SIZE, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_SIZE, 0, pos);
     }
 
     /**
@@ -2367,7 +2364,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MAJOR
      */
     public final float getHistoricalTouchMajor(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, 0, pos);
     }
 
     /**
@@ -2382,7 +2379,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MINOR
      */
     public final float getHistoricalTouchMinor(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, 0, pos);
     }
     
     /**
@@ -2397,7 +2394,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MAJOR
      */
     public final float getHistoricalToolMajor(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, 0, pos);
     }
 
     /**
@@ -2412,7 +2409,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MINOR
      */
     public final float getHistoricalToolMinor(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, 0, pos);
     }
     
     /**
@@ -2427,7 +2424,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_ORIENTATION
      */
     public final float getHistoricalOrientation(int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, 0, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, 0, pos);
     }
 
     /**
@@ -2444,7 +2441,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getHistoricalAxisValue(int axis, int pos) {
-        return _nativeGetAxisValue(mNativePtr, axis, 0, pos);
+        return nativeGetAxisValue(mNativePtr, axis, 0, pos);
     }
 
     /**
@@ -2462,7 +2459,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public final float getHistoricalX(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_X, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_X, pointerIndex, pos);
     }
 
     /**
@@ -2480,7 +2477,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getHistoricalY(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_Y, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_Y, pointerIndex, pos);
     }
 
     /**
@@ -2498,7 +2495,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_PRESSURE
      */
     public final float getHistoricalPressure(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_PRESSURE, pointerIndex, pos);
     }
 
     /**
@@ -2516,7 +2513,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_SIZE
      */
     public final float getHistoricalSize(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_SIZE, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_SIZE, pointerIndex, pos);
     }
     
     /**
@@ -2534,7 +2531,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MAJOR
      */
     public final float getHistoricalTouchMajor(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MAJOR, pointerIndex, pos);
     }
 
     /**
@@ -2552,7 +2549,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOUCH_MINOR
      */
     public final float getHistoricalTouchMinor(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOUCH_MINOR, pointerIndex, pos);
     }
 
     /**
@@ -2570,7 +2567,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MAJOR
      */
     public final float getHistoricalToolMajor(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MAJOR, pointerIndex, pos);
     }
 
     /**
@@ -2588,7 +2585,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_TOOL_MINOR
      */
     public final float getHistoricalToolMinor(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_TOOL_MINOR, pointerIndex, pos);
     }
 
     /**
@@ -2606,7 +2603,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_ORIENTATION
      */
     public final float getHistoricalOrientation(int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, AXIS_ORIENTATION, pointerIndex, pos);
     }
 
     /**
@@ -2625,7 +2622,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getHistoricalAxisValue(int axis, int pointerIndex, int pos) {
-        return _nativeGetAxisValue(mNativePtr, axis, pointerIndex, pos);
+        return nativeGetAxisValue(mNativePtr, axis, pointerIndex, pos);
     }
 
     /**
@@ -2832,8 +2829,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float right, float bottom) {
         final int pointerCount = nativeGetPointerCount(mNativePtr);
         for (int i = 0; i < pointerCount; i++) {
-            final float x = _nativeGetAxisValue(mNativePtr, AXIS_X, i, HISTORY_CURRENT);
-            final float y = _nativeGetAxisValue(mNativePtr, AXIS_Y, i, HISTORY_CURRENT);
+            final float x = nativeGetAxisValue(mNativePtr, AXIS_X, i, HISTORY_CURRENT);
+            final float y = nativeGetAxisValue(mNativePtr, AXIS_Y, i, HISTORY_CURRENT);
             if (x < left || x > right || y < top || y > bottom) {
                 return false;
             }
@@ -2891,22 +2888,16 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         int idBits = 0;
         final int pointerCount = nativeGetPointerCount(mNativePtr);
         for (int i = 0; i < pointerCount; i++) {
-            idBits |= 1 << getPointerId(i);
+            idBits |= 1 << nativeGetPointerId(mNativePtr, i);
         }
         return idBits;
     }
-
-    public final MotionEvent split(int idBits) {
-		if (mustAddPointerId())
-			idBits = idBits >> 1;
-		return split2(idBits);
-	}
 
     /**
      * Splits a motion event such that it includes only a subset of pointer ids.
      * @hide
      */
-    public final MotionEvent split2(int idBits) {
+    public final MotionEvent split(int idBits) {
         MotionEvent ev = obtain();
         synchronized (gSharedTempLock) {
             final int oldPointerCount = nativeGetPointerCount(mNativePtr);
@@ -3550,17 +3541,4 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             return id | (toolType << 8);
         }
     }
-
-    private boolean mustAddPointerId(){
-		return ((getSource() == InputDevice.SOURCE_TOUCHPAD) &&
-			(android.os.SystemProperties.getInt("mod.touchpad.startfrom1",0) == 1));
-	}
-
-    private float _nativeGetAxisValue(int nativePtr,
-            int axis, int pointerIndex, int historyPos){
-		int cnt = getPointerCount();
-		if (cnt > 0)
-			pointerIndex = (pointerIndex % cnt);
-		return nativeGetAxisValue(nativePtr, axis, pointerIndex, historyPos);
-	}
 }

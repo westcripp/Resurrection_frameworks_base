@@ -32,6 +32,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -117,6 +118,7 @@ final class DisplayPowerController {
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
     private static final int MSG_LIGHT_SENSOR_DEBOUNCED = 3;
+    private static final int MSG_UPDATE_BACKLIGHT_SETTINGS = 4;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -225,6 +227,10 @@ final class DisplayPowerController {
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish electron beam animation instead.
     private boolean mElectronBeamFadesConfig;
+
+    // Slim settings - override config for ElectronBeam
+    private boolean mElectronBeamOffEnabled;
+    private int mElectronBeamMode;
 
     // The pending power request.
     // Initially null until the first call to requestPowerState.
@@ -383,15 +389,16 @@ final class DisplayPowerController {
 
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
-
         if (mUseSoftwareAutoBrightnessConfig) {
             final ContentResolver cr = mContext.getContentResolver();
             final ContentObserver observer = new ContentObserver(mHandler) {
                 @Override
                 public void onChange(boolean selfChange, Uri uri) {
-                    mAutoBrightnessSettingsChanged = true;
-                    updateAutomaticBrightnessSettings();
-                    updatePowerState();
+                    // As both LUX and BACKLIGHT might be changed at the same time, there's
+                    // a potential race condition. As the settings provider API doesn't give
+                    // us transactions to avoid them, wait a little until things settle down
+                    mHandler.removeMessages(MSG_UPDATE_BACKLIGHT_SETTINGS);
+                    mHandler.sendEmptyMessageDelayed(MSG_UPDATE_BACKLIGHT_SETTINGS, 1000);
                 }
             };
 
@@ -480,11 +487,14 @@ final class DisplayPowerController {
                 return null;
             }
         }
-
         return values;
     }
 
     private static Spline createAutoBrightnessSpline(int[] lux, int[] brightness) {
+        if (lux.length < 2 || lux.length != (brightness.length - 1)) {
+            return null;
+        }
+
         try {
             final int n = brightness.length;
             float[] x = new float[n];
@@ -590,7 +600,8 @@ final class DisplayPowerController {
 
     private void initialize() {
         mPowerState = new DisplayPowerState(
-                new ElectronBeam(mDisplayManager), mDisplayBlanker,
+                new ElectronBeam(mDisplayManager, mElectronBeamMode),
+                mDisplayBlanker,
                 mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
@@ -629,7 +640,6 @@ final class DisplayPowerController {
         boolean mustInitialize = false;
         boolean updateAutoBrightness = mTwilightChanged || mAutoBrightnessSettingsChanged;
         boolean wasDim = false;
-
         mTwilightChanged = false;
         mAutoBrightnessSettingsChanged = false;
 
@@ -659,6 +669,15 @@ final class DisplayPowerController {
             }
 
             mustNotify = !mDisplayReadyLocked;
+        }
+
+        // update crt settings here
+        mElectronBeamOffEnabled = mPowerRequest.electronBeamOffEnabled;
+
+        // update crt mode settings and force initialize if value changed
+        if (mElectronBeamMode != mPowerRequest.electronBeamMode) {
+            mElectronBeamMode = mPowerRequest.electronBeamMode;
+            mustInitialize = true;
         }
 
         // Initialize things the first time the power state is changed.
@@ -780,7 +799,7 @@ final class DisplayPowerController {
                         if (mPowerState.getElectronBeamLevel() == 0.0f) {
                             setScreenOn(false);
                         } else if (mPowerState.prepareElectronBeam(
-                                mElectronBeamFadesConfig ?
+                                !mElectronBeamOffEnabled ?
                                         ElectronBeam.MODE_FADE :
                                                 ElectronBeam.MODE_COOL_DOWN)
                                 && mPowerState.isScreenOn()) {
@@ -841,7 +860,6 @@ final class DisplayPowerController {
                 mNotifier.onScreenOn();
             } else {
                 mLights.getLight(LightsService.LIGHT_ID_BUTTONS).setBrightness(0);
-                mLights.getLight(LightsService.LIGHT_ID_KEYBOARD).setBrightness(0);
                 mNotifier.onScreenOff();
             }
         }
@@ -1359,6 +1377,12 @@ final class DisplayPowerController {
 
                 case MSG_LIGHT_SENSOR_DEBOUNCED:
                     debounceLightSensor();
+                    break;
+
+                case MSG_UPDATE_BACKLIGHT_SETTINGS:
+                    mAutoBrightnessSettingsChanged = true;
+                    updateAutomaticBrightnessSettings();
+                    updatePowerState();
                     break;
             }
         }

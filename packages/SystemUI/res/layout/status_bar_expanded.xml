@@ -63,13 +63,36 @@
             android:layout_height="@dimen/notification_panel_header_height"
             />
 
-        <com.android.systemui.statusbar.powerwidget.PowerWidget
-            android:id="@+id/exp_power_stat"
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+            android:id="@+id/quick_toggles"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_panel_widget_height"
-            android:layout_marginTop="2dip"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:visibility="gone"
-        />
+            />
+
+        <LinearLayout
+            android:id="@+id/ribbon_qs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@*android:dimen/notification_ribbon_padding"
+            android:paddingRight="@*android:dimen/notification_ribbon_padding"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:gravity="center_horizontal"
+            />
+
+        <LinearLayout
+            android:id="@+id/ribbon_notif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@*android:dimen/notification_ribbon_padding"
+            android:paddingRight="@*android:dimen/notification_ribbon_padding"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            />
 
         <TextView
             android:id="@+id/emergency_calls_only"
@@ -107,22 +130,4 @@
             </ScrollView>
         </FrameLayout>
     </LinearLayout>
-    <HorizontalScrollView
-        android:id="@+id/custom_notification_scrollview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:requiresFadingEdge="none"
-        android:fillViewport="true"
-        android:overScrollMode="never"
-        android:layout_gravity="bottom"
-        android:visibility="invisible"
-        android:layout_marginBottom="@dimen/notification_shortcuts_close_handle_height">
-
-        <com.android.systemui.statusbar.phone.ShortcutsWidget
-            android:id="@+id/custom_notificiation_shortcuts"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            />
-    </HorizontalScrollView>
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->

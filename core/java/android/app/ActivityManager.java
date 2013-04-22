@@ -1999,7 +1999,7 @@ public class ActivityManager {
         }
     }
 
-    /**
+    /*
      * @throws SecurityException Throws SecurityException if the caller does
      * not hold the {@link android.Manifest.permission#CHANGE_CONFIGURATION} permission.
      *

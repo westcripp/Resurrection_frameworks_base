@@ -1561,9 +1561,9 @@
         android:protectionLevel="signature|system"
         android:label="@string/permlab_anyCodecForPlayback"
         android:description="@string/permdesc_anyCodecForPlayback" />
-        
-    <!-- Allows an application to access Superuser binary. This is a hack to avoid
-         Android Issue #25906 {@link https://code.google.com/p/android/issues/detail?id=25906 } -->
+
+<!-- Allows an application to access Superuser binary.
+        This is a hack to avoid Android Issue #25906 -->
     <permission android:name="android.permission.ACCESS_SUPERUSER"
         android:protectionLevel="normal"
         android:label="@string/permlab_accessSuperuser"
@@ -2116,6 +2116,13 @@
     <permission android:name="android.permission.COPY_PROTECTED_DATA"
         android:label="@string/permlab_copyProtectedData"
         android:description="@string/permlab_copyProtectedData"
+        android:protectionLevel="signature" />
+
+    <!-- Permission for reading writeing revoked permissions
+         @hide -->
+    <permission android:name="android.permission.REVOKE_PERMISSIONS"
+        android:label="@string/permlab_revokePermissions"
+        android:description="@string/permlab_revokePermissions"
         android:protectionLevel="signature" />
 
     <!-- Internal permission protecting access to the encryption methods
