@@ -192,8 +192,7 @@ public class RibbonTarget {
         mContext.sendBroadcastAsUser(i, UserHandle.ALL);
         mContext.sendBroadcastAsUser(b, UserHandle.ALL);
     }
-
-    public int mapChosenDpToPixels(int dp) {
+       public int mapChosenDpToPixels(int dp) {
         switch (dp) {
             case 0:
                 return 0;
