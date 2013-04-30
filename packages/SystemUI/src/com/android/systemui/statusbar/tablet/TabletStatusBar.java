@@ -145,6 +145,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     int mNumberOfButtons = 3;
     float mWidthLand = 0f;
     float mWidthPort = 0f;
+    boolean mLandscape = false;
     private int mMaxNotificationIcons = 5;
 
     TabletStatusBarView mStatusBarView;
@@ -435,12 +436,17 @@ public class TabletStatusBar extends BaseStatusBar implements
                 // we're screwed here fellas
             }
         }
-        UpdateWeights(isLandscape());
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mLandscape = true;
+        } else {
+            mLandscape = false;
+        }
+        UpdateWeights(mLandscape);
         loadDimens();
         final int currentHeight = getStatusBarHeight();
         final int barHeight = (isLandscape() ? mUserBarHeightLand : mUserBarHeight);
         if (currentHeight != barHeight) {
-            onBarHeightChanged(barHeight);
+            onBarHeightChanged(isLandscape() ? mUserBarHeightLand : mUserBarHeight);
         }
         mNotificationPanelParams.height = getNotificationPanelHeight();
         mWindowManager.updateViewLayout(mNotificationPanel,
@@ -451,9 +457,8 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected void loadDimens() {
         final Resources res = mContext.getResources();
 
-        mNaturalBarHeight = isLandscape() ?
-                res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height_landscape) :
-                    res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
+        mNaturalBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_height);
 
         int newIconSize = res.getDimensionPixelSize(
             com.android.internal.R.dimen.system_bar_icon_size);
@@ -805,10 +810,9 @@ public class TabletStatusBar extends BaseStatusBar implements
     };
 
     public int getStatusBarHeight() {
-        if (mStatusBarView == null) {
-            return (mNaturalBarHeight);
-        }
-        return mStatusBarView.getHeight();
+        return mStatusBarView != null ? mStatusBarView.getHeight()
+                : mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_height);
     }
 
     protected int getStatusBarGravity() {
@@ -1456,7 +1460,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         loadNotificationPanel();
 
         final LinearLayout.LayoutParams params
-            = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, getStatusBarHeight());
+            = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
 
         // alternate behavior in DND mode
         if (mNotificationDNDMode) {
@@ -1708,12 +1712,14 @@ public class TabletStatusBar extends BaseStatusBar implements
         final int currentHeight = getStatusBarHeight();
         final int barHeight = (isLandscape() ? mUserBarHeightLand : mUserBarHeight);
         if (currentHeight != barHeight) {
-            onBarHeightChanged(barHeight);
+            onBarHeightChanged(isLandscape() ? mUserBarHeightLand : mUserBarHeight);
         }
         mCurrentUIMode = Settings.System.getInt(cr, Settings.System.CURRENT_UI_MODE, 0);
         mNumberOfButtons = Settings.System.getInt(cr, Settings.System.NAVIGATION_BAR_BUTTONS_QTY, 3);
         mWidthLand = Settings.System.getFloat(cr, Settings.System.NAVIGATION_BAR_WIDTH_LAND, 0f);
         mWidthPort = Settings.System.getFloat(cr, Settings.System.NAVIGATION_BAR_WIDTH_PORT, 0f);
-        UpdateWeights(isLandscape());
+        mLandscape = (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+
+        UpdateWeights(mLandscape);
     }
 }

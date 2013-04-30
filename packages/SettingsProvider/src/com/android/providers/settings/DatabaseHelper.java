@@ -2212,7 +2212,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_desk_undock_sound);
             loadStringSetting(stmt, Settings.Global.CAR_DOCK_SOUND,
                     R.string.def_car_dock_sound);
-              loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_ENABLED,
+            loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_ENABLED,
                    R.bool.def_power_notifications_enabled);
             loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_VIBRATE,
                     R.bool.def_power_notifications_vibrate);

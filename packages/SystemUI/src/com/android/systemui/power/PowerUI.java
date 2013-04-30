@@ -127,8 +127,8 @@ public class PowerUI extends SystemUI {
 
                 final boolean plugged = mPlugType != 0;
                 final boolean oldPlugged = oldPlugType != 0;
-                
-                if (mIgnoreFirstPowerEvent && plugged) {
+
+              if (mIgnoreFirstPowerEvent && plugged) {
                     mIgnoreFirstPowerEvent = false;
                 }
 
@@ -173,7 +173,7 @@ public class PowerUI extends SystemUI {
                 } else if (mBatteryLevelTextView != null) {
                     showLowBatteryWarning();
                 }
-       } else if (action.equals(Intent.ACTION_POWER_CONNECTED)
+      } else if (action.equals(Intent.ACTION_POWER_CONNECTED)
                     || action.equals(Intent.ACTION_POWER_DISCONNECTED)) {
                 final ContentResolver cr = mContext.getContentResolver();
                 if (mIgnoreFirstPowerEvent) {
@@ -323,6 +323,7 @@ public class PowerUI extends SystemUI {
             if (powerNotify.sound != null) {
                 // DEFAULT_SOUND overrides so flip off
                 powerNotify.defaults &= ~Notification.DEFAULT_SOUND;
+
             }
         }
                 if (Settings.Global.getInt(cr,
@@ -331,8 +332,7 @@ public class PowerUI extends SystemUI {
         }
 
         notificationManager.notify(0, powerNotify);
-    }
-    
+    } 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);

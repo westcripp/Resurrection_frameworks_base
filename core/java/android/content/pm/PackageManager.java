@@ -2968,7 +2968,7 @@ public abstract class PackageManager {
      * Returns the revoked permissions for given package.
      * <p>
      * NOTE: If the package has a shared uid then the revoked permissions for that
-     * 			  uid will be returned.
+     *       uid will be returned.
      *
      * @param packageName Name of the package which revoked permissions are needed
      * @hide
@@ -2979,7 +2979,7 @@ public abstract class PackageManager {
      * Sets the revoked permissions for given package.
      * <p>
      * NOTE: If the package has a shared uid then this method will revoke the
-     * 			  permissions for that shared uid.
+     *       permissions for that shared uid.
      *
      * @param packageName Name of the package which revoked permissions are needed
      * @param the revoked permissions.

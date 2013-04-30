@@ -78,7 +78,7 @@ class AppErrorDialog extends BaseErrorDialog {
                 res.getText(com.android.internal.R.string.force_close),
                 mHandler.obtainMessage(FORCE_QUIT));
 
-        // disable the error send if there are revoked permissions. 
+        // disable the error send if there are revoked permissions.
         if (!showRevoked && app.errorReportReceiver != null) {
             setButton(DialogInterface.BUTTON_NEGATIVE,
                     res.getText(com.android.internal.R.string.report),
