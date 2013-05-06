@@ -1114,7 +1114,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             longSize = width;
             if (mNavBarFirstBootFlag) {
                 // This should only be run once at boot time.  Since we poke this
-                // routine often, it has the potential to screw with rotation settings.
+                // routine often, it has the potential to screw with rotation settings
                 mLandscapeRotation = Surface.ROTATION_0;
                 mSeascapeRotation = Surface.ROTATION_180;
                 if (reverseConfig) {
