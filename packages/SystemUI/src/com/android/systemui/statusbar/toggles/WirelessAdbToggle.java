@@ -32,6 +32,7 @@ public class WirelessAdbToggle extends StatefulToggle {
 
 
 
+
     public void init(Context c, int style) {
 
     protected void init(Context c, int style) {
@@ -41,6 +42,9 @@ public class WirelessAdbToggle extends StatefulToggle {
 
 
     protected void init(Context c, int style) {
+
+
+    public void init(Context c, int style) {
 
         super.init(c, style);
 
