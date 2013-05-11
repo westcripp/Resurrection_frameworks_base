@@ -29,23 +29,7 @@ public class WirelessAdbToggle extends StatefulToggle {
     SettingsObserver mObserver = null;
 
     @Override
-
-
-
-
     public void init(Context c, int style) {
-
-    protected void init(Context c, int style) {
-
-
-    public void init(Context c, int style) {
-
-
-    protected void init(Context c, int style) {
-
-
-    public void init(Context c, int style) {
-
         super.init(c, style);
 
         mConnMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -150,4 +134,5 @@ public class WirelessAdbToggle extends StatefulToggle {
         }
     }
 }
+
 
