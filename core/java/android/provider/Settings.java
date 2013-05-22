@@ -6648,7 +6648,6 @@ public final class Settings {
             AUTO_TIME,
             AUTO_TIME_ZONE,
             POWER_SOUNDS_ENABLED,
-             POWER_NOTIFICATIONS_ENABLED,
             POWER_NOTIFICATIONS_ENABLED,
             POWER_NOTIFICATIONS_VIBRATE,
             POWER_NOTIFICATIONS_RINGTONE,
